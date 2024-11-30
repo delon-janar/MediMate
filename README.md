@@ -1,3 +1,3 @@
-# ngobatyuk
+# MediMate
 
 A new Flutter project.
