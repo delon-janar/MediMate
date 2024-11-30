@@ -6,11 +6,11 @@ class FormScreen extends StatefulWidget {
   final Function(Map<String, String>)? onSave;
 
   const FormScreen({
-    Key? key,
+    super.key,
     required this.addMedicine,
     this.initialData,
     this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _FormScreenState createState() => _FormScreenState();
@@ -138,10 +138,10 @@ class _FormScreenState extends State<FormScreen> {
                         });
                       }
                     },
-                    child: const Text("Pilih Waktu"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 143, 175, 255),
                     ),
+                    child: const Text("Pilih Waktu"),
                   ),
                 ],
               ),
@@ -151,18 +151,18 @@ class _FormScreenState extends State<FormScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Batal"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
                           Colors.grey, // Tombol Batal tetap abu-abu
                     ),
+                    child: const Text("Batal"),
                   ),
                   ElevatedButton(
                     onPressed: _submitForm,
-                    child: const Text("Simpan"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 143, 175, 255),
                     ),
+                    child: const Text("Simpan"),
                   ),
                 ],
               ),

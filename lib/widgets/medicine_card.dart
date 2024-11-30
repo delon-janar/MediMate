@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class MedicineCard extends StatelessWidget {
   final String medicineName;
   final String time;
+  final String dosage; 
 
   const MedicineCard({
-    Key? key,
+    super.key,
     required this.medicineName,
     required this.time,
-  }) : super(key: key);
+    required this.dosage, 
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,13 @@ class MedicineCard extends StatelessWidget {
           medicineName,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        subtitle: Text("Waktu minum: $time"),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Waktu minum: $time"),
+            Text("Dosis: $dosage"), 
+          ],
+        ),
       ),
     );
   }

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import 'add_medicine_page.dart'; 
+import 'add_medicine_page.dart';
 
 class DetailMedicinePage extends StatelessWidget {
   final String medicineName;
   final String time;
+  final String dosage; // Tambahkan ini
   final Function(String) onDelete;
   final Function(Map<String, String>) onEdit;
-  final Function(Map<String, String>) addMedicine; 
+  final Function(Map<String, String>) addMedicine;
 
-  DetailMedicinePage({
+  const DetailMedicinePage({super.key, 
     required this.medicineName,
     required this.time,
+    required this.dosage, // Tambahkan ini
     required this.onDelete,
     required this.onEdit,
-    required this.addMedicine, 
+    required this.addMedicine,
   });
 
   @override
@@ -21,7 +23,7 @@ class DetailMedicinePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Obat'),
-        backgroundColor: const Color.fromARGB(255, 143, 175, 255), 
+        backgroundColor: const Color.fromARGB(255, 143, 175, 255),
         elevation: 4,
         shadowColor: const Color.fromARGB(255, 199, 182, 255),
       ),
@@ -84,6 +86,22 @@ class DetailMedicinePage extends StatelessWidget {
                       color: Colors.black54,
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Dosis:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    dosage,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -93,13 +111,12 @@ class DetailMedicinePage extends StatelessWidget {
               children: [
                 ElevatedButton.icon(
                   onPressed: () {
-                    // Navigasi ke form edit obat
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => FormScreen(
-                          addMedicine: addMedicine, // Tambahkan ini
-                          initialData: {'name': medicineName, 'time': time},
+                          addMedicine: addMedicine,
+                          initialData: {'name': medicineName, 'time': time, 'dosage': dosage},
                           onSave: (updatedMedicine) {
                             onEdit(updatedMedicine);
                             Navigator.pop(context);
@@ -116,14 +133,12 @@ class DetailMedicinePage extends StatelessWidget {
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
-                    // Konfirmasi sebelum menghapus obat
                     _showDeleteConfirmation(context);
                   },
                   icon: const Icon(Icons.delete, color: Colors.white),
                   label: const Text('Hapus'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 199, 82, 82),
-
                   ),
                 ),
               ],
@@ -143,23 +158,23 @@ class DetailMedicinePage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(ctx).pop(); // Tutup dialog
+              Navigator.of(ctx).pop();
             },
             child: const Text('Batal'),
           ),
           ElevatedButton(
             onPressed: () {
               onDelete(medicineName);
-              Navigator.of(ctx).pop(); // Tutup dialog
-              Navigator.of(context).pop(); // Kembali ke HomePage
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE53935), // Red
-            ),
-            child: const Text('Hapus'),
+               Navigator.of(ctx).pop(); // Tutup dialog
+            Navigator.of(context).pop(); // Kembali ke HomePage
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE53935), // Red
           ),
-        ],
-      ),
-    );
+          child: const Text('Hapus'),
+        ),
+      ],
+    ),
+  );
   }
 }

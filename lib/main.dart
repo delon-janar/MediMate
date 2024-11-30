@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'screens/home_page.dart';
 import 'screens/notification_page.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   runApp(MedicineReminderApp());
 }
 
