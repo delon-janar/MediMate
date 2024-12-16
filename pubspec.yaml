@@ -13,6 +13,8 @@ dependencies:
   flutter_local_notifications: ^15.0.0
   timezone: ^0.9.0
   permission_handler: ^10.0.0
+  path_provider: ^2.0.15
+  provider: ^6.1.2
 
 
 dev_dependencies:

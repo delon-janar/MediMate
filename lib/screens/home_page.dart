@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:ngobatyuk/main.dart'; // Pastikan ini sesuai dengan lokasi file main.dart
 import '../widgets/medicine_card.dart';
+import 'package:provider/provider.dart';
 import 'add_medicine_page.dart';
 import 'detail_medicine_page.dart';
 
@@ -68,6 +70,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Column(
@@ -90,10 +93,28 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        backgroundColor: const Color.fromARGB(255, 143, 175, 255),
+        backgroundColor: themeProvider.themeMode == ThemeMode.dark
+            ? Colors.grey[850]
+            : const Color.fromARGB(255, 143, 175, 255),
         elevation: 6.0,
-        shadowColor: const Color.fromARGB(255, 199, 182, 255),
+        shadowColor: themeProvider.themeMode == ThemeMode.dark
+            ? Colors.black45
+            : const Color.fromARGB(255, 199, 182, 255),
         actions: [
+          Row(
+            children: [
+              const Text(
+                "Dark Mode",
+                style: TextStyle(fontSize: 14, color: Colors.white),
+              ),
+              Switch(
+                value: themeProvider.themeMode == ThemeMode.dark,
+                onChanged: (value) {
+                  themeProvider.toggleTheme(value);
+                },
+              ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
@@ -103,12 +124,18 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFE3F2FD), Color(0xFFE8F5E9)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+        decoration: BoxDecoration(
+          gradient: themeProvider.themeMode == ThemeMode.dark
+              ? const LinearGradient(
+                  colors: [Color(0xFF212121), Color(0xFF37474F)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                )
+              : const LinearGradient(
+                  colors: [Color(0xFFE3F2FD), Color(0xFFE8F5E9)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
         ),
         child: Column(
           children: [
@@ -151,11 +178,15 @@ class _HomePageState extends State<HomePage> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: themeProvider.themeMode == ThemeMode.dark
+                              ? Colors.grey[800]
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(8),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: themeProvider.themeMode == ThemeMode.dark
+                                  ? Colors.black.withOpacity(0.3)
+                                  : Colors.black.withOpacity(0.1),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),

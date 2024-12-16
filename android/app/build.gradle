@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.0.0" // Match Gradle version
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22" // Compatible Kotlin version
+    }
+}
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -11,12 +22,13 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true // Enables desugaring
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "17"
     }
 
     defaultConfig {
@@ -28,6 +40,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        minSdkVersion 21
+    }
+    dependencies {
+        coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.3" // This line is critical
     }
 
     buildTypes {

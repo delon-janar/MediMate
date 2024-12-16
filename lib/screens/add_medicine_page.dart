@@ -59,16 +59,20 @@ class _FormScreenState extends State<FormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.initialData != null ? "Edit Obat" : "Tambah Obat"),
-        backgroundColor:
-            const Color.fromARGB(255, 143, 175, 255), // Biru lembut
+        backgroundColor: isDarkMode
+            ? Colors.blueGrey[800]
+            : const Color.fromARGB(255, 143, 175, 255), // Different color for dark mode
         elevation: 6.0,
-        shadowColor: const Color.fromARGB(255, 199, 182, 255), // Bayangan ungu
+        shadowColor: isDarkMode
+            ? Colors.black.withOpacity(0.5)
+            : const Color.fromARGB(255, 199, 182, 255), // Darker shadow in dark mode
       ),
-      backgroundColor:
-          const Color.fromARGB(255, 240, 245, 255), // Latar belakang biru pucat
+      backgroundColor: isDarkMode ? Colors.black87 : const Color.fromARGB(255, 240, 245, 255),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -81,10 +85,14 @@ class _FormScreenState extends State<FormScreen> {
                 decoration: InputDecoration(
                   labelText: 'Nama Obat',
                   filled: true,
-                  fillColor: const Color.fromARGB(
-                      255, 248, 248, 255), // Latar belakang TextField
+                  fillColor: isDarkMode
+                      ? Colors.grey[850]
+                      : const Color.fromARGB(255, 248, 248, 255),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  labelStyle: TextStyle(
+                    color: isDarkMode ? Colors.white70 : Colors.black87,
                   ),
                 ),
                 validator: (value) {
@@ -103,9 +111,14 @@ class _FormScreenState extends State<FormScreen> {
                 decoration: InputDecoration(
                   labelText: 'Dosis',
                   filled: true,
-                  fillColor: const Color.fromARGB(255, 248, 248, 255),
+                  fillColor: isDarkMode
+                      ? Colors.grey[850]
+                      : const Color.fromARGB(255, 248, 248, 255),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  labelStyle: TextStyle(
+                    color: isDarkMode ? Colors.white70 : Colors.black87,
                   ),
                 ),
                 validator: (value) {
@@ -123,7 +136,10 @@ class _FormScreenState extends State<FormScreen> {
                 children: [
                   Text(
                     "Waktu Minum: ${_time.format(context)}",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const Spacer(),
                   ElevatedButton(
@@ -139,7 +155,9 @@ class _FormScreenState extends State<FormScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 143, 175, 255),
+                      backgroundColor: isDarkMode
+                          ? Colors.blueGrey[700]
+                          : const Color.fromARGB(255, 143, 175, 255),
                     ),
                     child: const Text("Pilih Waktu"),
                   ),
@@ -152,15 +170,16 @@ class _FormScreenState extends State<FormScreen> {
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Colors.grey, // Tombol Batal tetap abu-abu
+                      backgroundColor: isDarkMode ? Colors.grey[600] : Colors.grey,
                     ),
                     child: const Text("Batal"),
                   ),
                   ElevatedButton(
                     onPressed: _submitForm,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 143, 175, 255),
+                      backgroundColor: isDarkMode
+                          ? Colors.blueGrey[700]
+                          : const Color.fromARGB(255, 143, 175, 255),
                     ),
                     child: const Text("Simpan"),
                   ),
