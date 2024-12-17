@@ -4,6 +4,10 @@ import '../widgets/medicine_card.dart';
 import 'package:provider/provider.dart';
 import 'add_medicine_page.dart';
 import 'detail_medicine_page.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,18 +17,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Map<String, String>> _medicineList = [
-    {"name": "Paracetamol", "time": "08:00 AM", "dosage": "500mg"},
-    {"name": "Vitamin C", "time": "12:00 PM", "dosage": "1000mg"},
-  ];
-
+  List<Map<String, String>> _medicineList = [];
   List<Map<String, String>> _filteredMedicineList = [];
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _filteredMedicineList = _medicineList;
+    _loadMedicines();
     _searchController.addListener(_filterMedicines);
   }
 
@@ -34,6 +34,121 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  Future<String> _getFilePath(String fileName) async {
+    final directory = await getApplicationDocumentsDirectory();
+    return '${directory.path}/$fileName';
+  }
+
+  Future<void> _loadMedicines() async {
+    try {
+      final filePath = await _getFilePath('medicines.txt');
+      final file = File(filePath);
+
+      if (await file.exists()) {
+        final contents = await file.readAsString();
+        final List<dynamic> jsonMedicines = jsonDecode(contents);
+        setState(() {
+          _medicineList = jsonMedicines
+              .map((item) => Map<String, String>.from(item))
+              .toList();
+          _filteredMedicineList = _medicineList;
+        });
+      }
+    } catch (e) {
+      print('Error loading medicines: $e');
+    }
+  }
+
+  Future<void> _saveMedicines() async {
+    try {
+      final filePath = await _getFilePath('medicines.txt');
+      final file = File(filePath);
+      await file.writeAsString(jsonEncode(_medicineList));
+    } catch (e) {
+      print('Error saving medicines: $e');
+    }
+  }
+
+  Future<void> _addReminder(Map<String, dynamic> reminder) async {
+    try {
+      final filePath = await _getFilePath('reminders.txt');
+      final file = File(filePath);
+
+      List<Map<String, dynamic>> reminders = [];
+      if (await file.exists()) {
+        final contents = await file.readAsString();
+        final List<dynamic> jsonReminders = jsonDecode(contents);
+        reminders = jsonReminders
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+
+      // Add the new reminder
+      reminders.add({
+        "time": reminder["time"] ?? "Unknown Time",
+        "active": reminder["active"] ?? true, // Ensure active is a bool
+      });
+
+      // Save the updated reminders list
+      await file.writeAsString(jsonEncode(reminders));
+    } catch (e) {
+      print('Error adding reminder: $e');
+    }
+  }
+
+  Future<void> _loadReminders() async {
+    try {
+      final filePath = await _getFilePath('reminders.txt');
+      final file = File(filePath);
+
+      if (await file.exists()) {
+        final contents = await file.readAsString();
+        final List<dynamic> jsonReminders = jsonDecode(contents);
+        setState(() {
+          // Just print or use the reminders list for now
+          print("Loaded reminders: $jsonReminders");
+        });
+      }
+    } catch (e) {
+      print('Error loading reminders: $e');
+    }
+  }
+
+  void _addMedicine(Map<String, String> medicine) {
+    setState(() {
+      _medicineList.add(medicine);
+      _filterMedicines();
+      _saveMedicines();
+
+      _addReminder({
+        "time": medicine["time"] ?? "Unknown Time",
+        "active": true, 
+      }).then((_) {
+        _loadReminders(); 
+      });
+    });
+  }
+  
+  void _deleteMedicine(String name) {
+    setState(() {
+      _medicineList.removeWhere((medicine) => medicine['name'] == name);
+      _filterMedicines();
+      _saveMedicines();
+    });
+  }
+
+  void _editMedicine(Map<String, String> updatedMedicine) {
+    setState(() {
+      final index = _medicineList.indexWhere((medicine) =>
+          medicine['name'] == updatedMedicine['name']);
+      if (index != -1) {
+        _medicineList[index] = updatedMedicine;
+        _filterMedicines();
+        _saveMedicines();
+      }
+    });
+  }
+
   void _filterMedicines() {
     final query = _searchController.text.toLowerCase();
     setState(() {
@@ -41,30 +156,6 @@ class _HomePageState extends State<HomePage> {
         final medicineName = medicine['name']!.toLowerCase();
         return medicineName.contains(query);
       }).toList();
-    });
-  }
-
-  void _addMedicine(Map<String, String> medicine) {
-    setState(() {
-      _medicineList.add(medicine);
-      _filterMedicines();
-    });
-  }
-
-  void _deleteMedicine(String name) {
-    setState(() {
-      _medicineList.removeWhere((medicine) => medicine['name'] == name);
-      _filterMedicines();
-    });
-  }
-
-  void _editMedicine(Map<String, String> updatedMedicine) {
-    setState(() {
-      final index = _medicineList.indexWhere((medicine) => medicine['name'] == updatedMedicine['name']);
-      if (index != -1) {
-        _medicineList[index] = updatedMedicine;
-        _filterMedicines();
-      }
     });
   }
 
@@ -118,7 +209,10 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
-              Navigator.pushNamed(context, '/notification');
+              Navigator.pushNamed(context, '/notification').then((_) {
+                // When returning to NotificationPage, ensure it reloads the reminders
+                setState(() {});
+              });
             },
           ),
         ],

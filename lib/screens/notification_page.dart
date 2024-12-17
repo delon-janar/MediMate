@@ -5,6 +5,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import '../main.dart'; 
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -51,7 +53,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
 
     await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
   }
 
@@ -70,23 +73,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Future<void> _loadReminders() async {
-    try {
-      final filePath = await _getFilePath();
-      final file = File(filePath);
+  try {
+    final filePath = await _getFilePath();
+    final file = File(filePath);
 
-      if (await file.exists()) {
-        final contents = await file.readAsString();
-        final List<dynamic> jsonReminders = jsonDecode(contents);
-        setState(() {
-          reminders = jsonReminders
-              .map((item) => Map<String, dynamic>.from(item))
-              .toList();
-        });
-      }
-    } catch (e) {
-      print('Error loading reminders: $e');
+    if (await file.exists()) {
+      final contents = await file.readAsString();
+      final List<dynamic> jsonReminders = jsonDecode(contents);
+      setState(() {
+        reminders = jsonReminders.map((item) {
+          // Ensure 'active' is always a bool
+          return {
+            "time": item["time"] ?? "Unknown Time",
+            "active": item["active"] ?? true, // Default 'active' to true
+          };
+        }).toList();
+      });
     }
+  } catch (e) {
+    print('Error loading reminders: $e');
   }
+}
 
   Future<void> _saveReminders() async {
     try {
@@ -225,7 +232,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     flutterLocalNotificationsPlugin.zonedSchedule(
       index, // Unique ID for notification
       'Time To Take Your Meds', // Notification title
-      'Hey! Do not forget to take your medicine, it is time for your daily intake', // Notification body
+      'Hey! do not forget to take your medicine, it is time for your daily intake', // Notification body
       tzDateTime, // Scheduled time
       notificationDetails, // Notification details
       androidAllowWhileIdle: true, // Allow notification while idle
@@ -246,68 +253,77 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Get current theme
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    _loadReminders();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notification Settings'),
-        backgroundColor: isDarkMode ? Colors.grey[850] : const Color.fromARGB(255, 143, 175, 255),
-        elevation: 6.0,
-        shadowColor: isDarkMode ? Colors.black.withOpacity(0.7) : const Color.fromARGB(255, 199, 182, 255),
+        title: const Text('Notification Page'),
+        backgroundColor: themeProvider.themeMode == ThemeMode.dark
+            ? Colors.grey[850]
+            : const Color.fromARGB(255, 143, 175, 255),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDarkMode
-                ? [Colors.black87, Colors.grey[900]!]
-                : [Color(0xFFE3F2FD), Color(0xFFE8F5E9)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: ListView.builder(
-          itemCount: reminders.length,
-          itemBuilder: (context, index) {
-            return Card(
-              margin: const EdgeInsets.all(8.0),
-              color: isDarkMode ? Colors.grey[800] : Colors.white,
-              child: ListTile(
-                title: Text('Time: ${reminders[index]['time']}',
-                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        _editReminder(index);
-                      },
-                    ),
-                    Switch(
-                      value: reminders[index]['active'],
-                      onChanged: (value) {
-                        _toggleNotification(index);
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        _deleteReminder(index);
-                      },
-                    ),
-                  ],
+      backgroundColor: themeProvider.themeMode == ThemeMode.dark
+          ? const Color(0xFF121212)
+          : const Color(0xFFF1F1F1),
+      body: ListView.builder(
+        itemCount: reminders.length,
+        itemBuilder: (context, index) {
+          final reminder = reminders[index];
+          return Card(
+            color: themeProvider.themeMode == ThemeMode.dark
+                ? Colors.grey[800]
+                : Colors.white,
+            child: ListTile(
+              title: Text(
+                'Reminder at ${reminder['time']}',
+                style: TextStyle(
+                  color: themeProvider.themeMode == ThemeMode.dark
+                      ? Colors.white
+                      : Colors.black,
                 ),
               ),
-            );
-          },
-        ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Edit button
+                  IconButton(
+                    icon: Icon(Icons.edit, 
+                        color: themeProvider.themeMode == ThemeMode.dark
+                            ? Colors.white
+                            : Colors.grey[800]),
+                    onPressed: () => _editReminder(index),
+                  ),
+                  // Delete button
+                  IconButton(
+                    icon: Icon(Icons.delete, 
+                        color: themeProvider.themeMode == ThemeMode.dark
+                            ? Colors.red[300]
+                            : Colors.red),
+                    onPressed: () => _deleteReminder(index),
+                  ),
+                  // Toggle switch
+                  Switch(
+                    value: reminder['active'],
+                    onChanged: (value) {
+                      _toggleNotification(index);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addReminder,
+        backgroundColor: themeProvider.themeMode == ThemeMode.dark
+            ? Colors.blueGrey
+            : const Color.fromARGB(255, 143, 175, 255),
         child: const Icon(Icons.add),
-        backgroundColor: isDarkMode ? Colors.blueGrey : Colors.blue,
       ),
     );
   }
+
+
 }
